@@ -27,4 +27,4 @@ const pricingTierSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.model("PricingTier", pricingTierSchema);
+export default mongoose.model("PricingTier", pricingTierSchema, "tariffs");

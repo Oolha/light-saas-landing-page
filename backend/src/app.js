@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import pricingTiersRoutes from "./routes/pricingTiers.js";
 import testimonialsRoutes from "./routes/testimonials.js";
+import uploadsRoutes from "./routes/uploads.js";
 
 dotenv.config();
 
@@ -13,9 +14,11 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static("src/uploads"));
 
 app.use("/api/pricing-tiers", pricingTiersRoutes);
 app.use("/api/testimonials", testimonialsRoutes);
+app.use("/api/uploads", uploadsRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
