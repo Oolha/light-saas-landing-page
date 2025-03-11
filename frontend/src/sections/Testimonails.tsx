@@ -3,6 +3,7 @@ import { testimonialService } from "@/services/api";
 import { Testimonial } from "@/types/index";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 const TestimonialCard = ({ item }: { item: Testimonial }) => (
   <div className="card h-full">
