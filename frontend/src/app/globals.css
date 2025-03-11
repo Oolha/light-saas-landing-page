@@ -2,7 +2,7 @@
 
 @layer components {
   .container {
-    @apply mx-auto px-4 sm:px-6 lg:px-8 xl:px-10;
+    @apply mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 max-w-7xl;
   }
   .btn {
     @apply py-2 px-4 rounded-lg font-medium inline-flex items-center justify-center tracking-tight;
@@ -32,6 +32,6 @@
     @apply max-w-[540px] mx-auto;
   }
   .card {
-    @apply p-10 border border-[#F1F1F1] rounded-3xl shadow-[0_7px_14-x_#EAEAEA] max-w-xs w-full;
+    @apply p-10 border border-[#F1F1F1] rounded-3xl shadow-[0_7px_14-px_#EAEAEA] max-w-xs w-full;
   }
 }

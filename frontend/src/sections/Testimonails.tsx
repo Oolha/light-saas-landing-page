@@ -73,7 +73,7 @@ export default function Testimonials() {
   );
 
   return (
-    <section className="bg-white py-16">
+    <section id="customers" className="bg-white py-16">
       <div className="container">
         <div className="section-heading">
           <div className="flex justify-center">
