@@ -43,25 +43,32 @@ export default function Testimonials() {
     fetchReviews();
   }, []);
 
-  const firstColumn = reviews.slice(0, 3);
-  const secondColumn = reviews.slice(3, 6);
-  const thirdColumn = reviews.slice(6, 9);
+  const duplicatedReviews = [...reviews, ...reviews];
 
-  const TestimonialsColumn = ({
+  const AnimatedTestimonialsColumn = ({
     reviews,
-    className = "",
+    duration,
   }: {
     reviews: Testimonial[];
-    className?: string;
+    duration?: number;
   }) => (
-    <div
-      className={`flex flex-col gap-6 [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)] ${className}`}
-    >
-      {reviews.map((item) => (
-        <div key={item._id}>
-          <TestimonialCard item={item} />
-        </div>
-      ))}
+    <div className="h-[500px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)] [webkit-mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)]">
+      <motion.div
+        className="flex flex-col gap-6"
+        animate={{ translateY: "-50%" }}
+        transition={{
+          duration: duration || 15,
+          repeat: Infinity,
+          ease: "linear",
+          repeatType: "loop",
+        }}
+      >
+        {reviews.map((item, index) => (
+          <div key={`${item._id}-${index}`} className="flex-none">
+            <TestimonialCard item={item} />
+          </div>
+        ))}
+      </motion.div>
     </div>
   );
 
@@ -79,17 +86,30 @@ export default function Testimonials() {
           </p>
         </div>
         <div className="flex flex-col items-center md:flex-row justify-center gap-6 mt-10">
-          <TestimonialsColumn reviews={firstColumn} />
+          {reviews.length > 0 && (
+            <>
+              <AnimatedTestimonialsColumn
+                reviews={duplicatedReviews}
+                duration={25}
+              />
 
-          <TestimonialsColumn
-            reviews={secondColumn}
-            className="hidden md:flex"
-          />
+              <div className="hidden md:block">
+                <AnimatedTestimonialsColumn
+                  reviews={[...duplicatedReviews].reverse()}
+                  duration={17}
+                />
+              </div>
 
-          <TestimonialsColumn
-            reviews={thirdColumn}
-            className="hidden lg:flex"
-          />
+              <div className="hidden lg:block">
+                <AnimatedTestimonialsColumn
+                  duration={21}
+                  reviews={duplicatedReviews
+                    .slice()
+                    .sort(() => Math.random() - 0.5)}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </section>
