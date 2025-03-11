@@ -28,6 +28,9 @@
   .section-heading {
     @apply max-w-[540px] mx-auto;
   }
+  .card {
+  @apply p-10 border border-[#F1F1F1] rounded-3xl shadow-[0_7px_14-x_#EAEAEA] max-w-xs w-full;
+  }
 }
 
 .container {

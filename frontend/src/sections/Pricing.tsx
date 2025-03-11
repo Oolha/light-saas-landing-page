@@ -5,7 +5,7 @@ import { PricingTier } from "@/types";
 import CheckIcon from "@/assets/check.svg";
 import { twMerge } from "tailwind-merge";
 
-export const Pricing = () => {
+export default function Pricing() {
   const [pricingTiers, setPricingTiers] = useState<PricingTier[]>([]);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export const Pricing = () => {
     fetchPricingTiers();
   }, []);
   return (
-    <section className="py-24">
+    <section className="py-24 bg-white">
       <div className="container">
         <div className="section-heading">
           <h2 className="section-title">Pricing</h2>
@@ -34,7 +34,7 @@ export const Pricing = () => {
             <div
               key={item._id}
               className={twMerge(
-                "p-10 border border-[#F1F1F1] rounded-3xl shadow-[0_7px_14-x_#EAEAEA] max-w-xs w-full",
+                "card",
                 item.inverse === true && "border-black bg-black text-white"
               )}
             >
@@ -85,4 +85,4 @@ export const Pricing = () => {
       </div>
     </section>
   );
-};
+}
