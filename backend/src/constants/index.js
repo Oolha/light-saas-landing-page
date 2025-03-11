@@ -1,0 +1,7 @@
+export const ONE_MINUTE = 60 * 1000;
+export const ONE_HOUR = 60 * ONE_MINUTE;
+export const ONE_DAY = 24 * ONE_HOUR;
+export const ONE_WEEK = 7 * ONE_DAY;
+
+export const ACCESS_TOKEN_EXPIRY = ONE_HOUR;
+export const REFRESH_TOKEN_EXPIRY = ONE_DAY;

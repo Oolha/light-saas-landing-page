@@ -1,10 +1,12 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import pricingTiersRoutes from "./routes/pricingTiers.js";
 import testimonialsRoutes from "./routes/testimonials.js";
 import uploadsRoutes from "./routes/uploads.js";
+import authRoutes from "./routes/auth.js";
 
 dotenv.config();
 
@@ -20,11 +22,13 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 app.use("/uploads", express.static("src/uploads"));
 
 app.use("/api/pricing-tiers", pricingTiersRoutes);
 app.use("/api/testimonials", testimonialsRoutes);
 app.use("/api/uploads", uploadsRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
