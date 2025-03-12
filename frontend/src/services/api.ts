@@ -1,9 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { PricingTier, Testimonial, UploadResponse } from "@/types";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://saas-website-tlj3.onrender.com/api";
+const API_URL = "https://saas-website-tlj3.onrender.com/api";
 
 export const api = axios.create({
   baseURL: API_URL,
