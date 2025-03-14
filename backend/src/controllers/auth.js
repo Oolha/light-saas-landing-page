@@ -10,11 +10,27 @@ import {
 // Register a new user
 export const registerUserController = async (req, res) => {
   try {
-    const user = await registerUser(req.body);
+    const userData = {
+      ...req.body,
+      subscription: {
+        plan: req.body.plan || "Free",
+        startDate: new Date(),
+        isActive: true,
+        endDate:
+          req.body.plan && req.body.plan !== "Free"
+            ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+            : null,
+      },
+    };
+
+    const user = await registerUser(userData);
     res.status(201).json({
       status: 201,
       message: "Successfully registered a user!",
-      data: user,
+      data: {
+        user,
+        subscription: user.subscription,
+      },
     });
   } catch (error) {
     res.status(400).json({
@@ -45,7 +61,10 @@ export const loginUserController = async (req, res) => {
       message: "Successfully logged in a user!",
       data: {
         accessToken: session.accessToken,
-        user,
+        user: {
+          ...user,
+          subscription: user.subscription,
+        },
       },
     });
   } catch (error) {

@@ -25,6 +25,29 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    subscription: {
+      plan: {
+        type: String,
+        enum: ["Free", "Pro", "Business"],
+        default: "Free",
+      },
+      startDate: {
+        type: Date,
+        default: Date.now,
+      },
+      endDate: {
+        type: Date,
+        default: null,
+      },
+      isActive: {
+        type: Boolean,
+        default: true,
+      },
+      paymentId: {
+        type: String,
+        default: null,
+      },
+    },
   },
   {
     timestamps: true,

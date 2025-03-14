@@ -7,6 +7,7 @@ import pricingTiersRoutes from "./routes/pricingTiers.js";
 import testimonialsRoutes from "./routes/testimonials.js";
 import uploadsRoutes from "./routes/uploads.js";
 import authRoutes from "./routes/auth.js";
+import subscriptionRoutes from "./routes/subscription.js";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use("/api/pricing-tiers", pricingTiersRoutes);
 app.use("/api/testimonials", testimonialsRoutes);
 app.use("/api/uploads", uploadsRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/subscription", subscriptionRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

@@ -4,7 +4,7 @@ import { generateTokens, verifyRefreshToken } from "./token.js";
 
 // Register a new user
 export const registerUser = async (userData) => {
-  const { name, email, password } = userData;
+  const { name, email, password, subscription } = userData;
 
   // Check if user already exists
   const existingUser = await User.findOne({ email });
@@ -17,6 +17,12 @@ export const registerUser = async (userData) => {
     name,
     email,
     password,
+    subscription: subscription || {
+      plan: "Free",
+      startDate: new Date(),
+      isActive: true,
+      endDate: null,
+    },
   });
 
   // Return user data without password
@@ -25,6 +31,7 @@ export const registerUser = async (userData) => {
     name: user.name,
     email: user.email,
     role: user.role,
+    subscription: user.subscription,
   };
 };
 
@@ -44,7 +51,17 @@ export const loginUser = async (credentials) => {
     throw new Error("Invalid credentials");
   }
 
-  // Generate tokens
+  if (
+    user.subscription &&
+    user.subscription.plan !== "Free" &&
+    user.subscription.endDate &&
+    new Date() > new Date(user.subscription.endDate)
+  ) {
+    user.subscription.plan = "Free";
+    user.subscription.endDate = null;
+    await user.save();
+  }
+
   const tokens = generateTokens(user._id);
 
   // Create session
@@ -63,6 +80,7 @@ export const loginUser = async (credentials) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      subscription: user.subscription,
     },
   };
 };
