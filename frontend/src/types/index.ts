@@ -6,6 +6,7 @@ export interface PricingTier {
   popular: boolean;
   inverse: boolean;
   features: string[];
+  order: number;
 }
 
 export interface Testimonial {

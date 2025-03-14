@@ -14,7 +14,7 @@ export const pricingService = {
   getAll: async (): Promise<PricingTier[]> => {
     const response: AxiosResponse<PricingTier[]> =
       await api.get("/pricing-tiers");
-    return response.data;
+    return response.data.sort((a, b) => a.order - b.order);
   },
 };
 

@@ -40,10 +40,7 @@ export const Footer = () => {
           <SocialPin />
           <SocialYouTube />
         </div>
-        <p className="mt-6">
-          &copy; {new Date().getFullYear()} Your Company, Inc. All rights
-          reserved
-        </p>
+        <p className="mt-6">&copy; Your Company, Inc. All rights reserved</p>
       </div>
     </footer>
   );
