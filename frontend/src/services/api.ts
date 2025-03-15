@@ -1,5 +1,10 @@
 import axios, { AxiosResponse } from "axios";
-import { PricingTier, Testimonial, UploadResponse } from "@/types";
+import {
+  PricingTier,
+  Subscription,
+  Testimonial,
+  UploadResponse,
+} from "@/types";
 
 const API_URL = "https://saas-website-tlj3.onrender.com/api";
 
@@ -9,6 +14,21 @@ export const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("accessToken");
+
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export const pricingService = {
   getAll: async (): Promise<PricingTier[]> => {
@@ -42,5 +62,27 @@ export const uploadService = {
     );
 
     return response.data;
+  },
+};
+
+export const subscriptionService = {
+  getStatus: async (): Promise<Subscription> => {
+    const response: AxiosResponse<{
+      status: number;
+      message: string;
+      data: { subscription: Subscription };
+    }> = await api.get("/subscription/status");
+    return response.data.data.subscription;
+  },
+
+  updatePlan: async (
+    plan: "Free" | "Pro" | "Business"
+  ): Promise<Subscription> => {
+    const response: AxiosResponse<{
+      status: number;
+      message: string;
+      data: { subscription: Subscription };
+    }> = await api.post("/subscription/update", { plan });
+    return response.data.data.subscription;
   },
 };

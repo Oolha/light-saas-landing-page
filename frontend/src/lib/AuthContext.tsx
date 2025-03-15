@@ -120,7 +120,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Функція реєстрації
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    plan: "Free" | "Pro" | "Business" = "Free"
+  ) => {
     setIsLoading(true);
     setError(null);
 
@@ -130,7 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, plan }),
       });
 
       const data = await response.json();
@@ -151,6 +156,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     setIsLoading(true);
 
+    sessionStorage.setItem("loggingOut", "true");
+
     try {
       await fetch(`${API_URL}/auth/logout`, {
         method: "POST",
@@ -160,6 +167,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("accessToken");
       setUser(null);
       router.push("/");
+
+      setTimeout(() => {
+        sessionStorage.removeItem("loggingOut");
+      }, 1000);
     } catch (error) {
       console.error("Logout error:", error);
     } finally {

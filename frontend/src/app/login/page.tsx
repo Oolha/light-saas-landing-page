@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,11 +11,19 @@ export default function LoginPage() {
   const { login, user, isLoading, error, clearError } = useAuth();
   const router = useRouter();
 
+  const searchParams = useSearchParams();
+  const nextPage = searchParams.get("next");
+  const selectedPlan = searchParams.get("plan");
+
   useEffect(() => {
     if (user) {
-      router.push("/dashboard");
+      if (nextPage === "subscription" && selectedPlan) {
+        router.push(`/subscription?plan=${selectedPlan}`);
+      } else {
+        router.push("/dashboard");
+      }
     }
-  }, [user, router]);
+  }, [user, router, nextPage, selectedPlan]);
 
   useEffect(() => {
     return () => {

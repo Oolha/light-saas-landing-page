@@ -18,7 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="relative">
-      <body className={twMerge(dmSans.className, "antialiased bg-[#eaeefe]")}>
+      <body
+        className={twMerge(dmSans.className, "antialiased bg-[#eaeefe]")}
+        suppressHydrationWarning={true}
+      >
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

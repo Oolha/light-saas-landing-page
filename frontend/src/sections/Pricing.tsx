@@ -5,9 +5,13 @@ import { PricingTier } from "@/types";
 import CheckIcon from "@/assets/check.svg";
 import { twMerge } from "tailwind-merge";
 import { motion } from "framer-motion";
+import { useAuth } from "@/lib/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Pricing() {
   const [pricingTiers, setPricingTiers] = useState<PricingTier[]>([]);
+  const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchPricingTiers = async () => {
@@ -20,6 +24,19 @@ export default function Pricing() {
     };
     fetchPricingTiers();
   }, []);
+
+  const handlePlanSelection = (plan: PricingTier) => {
+    if (!user) {
+      router.push(`/register?next=subscription&plan=${plan.title}`);
+    } else {
+      if (plan.title === "Free") {
+        router.push("/dashboard");
+      } else {
+        router.push(`/subscription?plan=${plan.title}`);
+      }
+    }
+  };
+
   return (
     <section id="pricing" className="py-24 bg-white">
       <div className="container">
@@ -76,6 +93,7 @@ export default function Pricing() {
                 </span>
               </div>
               <button
+                onClick={() => handlePlanSelection(item)}
                 className={twMerge(
                   "btn btn-primary w-full mt-[30px]",
                   item.inverse === true && "bg-white text-black"

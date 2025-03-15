@@ -29,6 +29,7 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  subscription?: Subscription;
 }
 
 export interface AuthContextType {
@@ -36,7 +37,20 @@ export interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    plan?: "Free" | "Pro" | "Business"
+  ) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
+}
+
+export interface Subscription {
+  plan: "Free" | "Pro" | "Business";
+  startDate: Date;
+  endDate: Date | null;
+  isActive: boolean;
+  paymentId: string | null;
 }

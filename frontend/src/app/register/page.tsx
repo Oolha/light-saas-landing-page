@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -14,12 +14,24 @@ export default function RegisterPage() {
 
   const { register, user, isLoading, error, clearError } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextPage = searchParams.get("next");
+  const selectedPlan = searchParams.get("plan") || "Free";
 
   useEffect(() => {
     if (user) {
-      router.push("/dashboard");
+      // Якщо успішно зареєструвались і є параметри для перенаправлення
+      if (
+        nextPage === "subscription" &&
+        selectedPlan &&
+        selectedPlan !== "Free"
+      ) {
+        router.push(`/subscription?plan=${selectedPlan}`);
+      } else {
+        router.push("/dashboard");
+      }
     }
-  }, [user, router]);
+  }, [user, router, nextPage, selectedPlan]);
 
   useEffect(() => {
     return () => {
@@ -41,7 +53,12 @@ export default function RegisterPage() {
     }
 
     setFormError(null);
-    await register(name, email, password);
+    await register(
+      name,
+      email,
+      password,
+      selectedPlan as "Free" | "Pro" | "Business"
+    );
   };
 
   return (
@@ -50,6 +67,13 @@ export default function RegisterPage() {
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Create a new account
         </h2>
+
+        {selectedPlan !== "Free" && (
+          <p className="mt-2 text-center text-md text-indigo-600 font-medium">
+            You're signing up for the {selectedPlan} plan
+          </p>
+        )}
+
         <p className="mt-2 text-center text-sm text-gray-600">
           Or{" "}
           <Link
