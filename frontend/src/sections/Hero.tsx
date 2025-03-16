@@ -1,20 +1,26 @@
 "use client";
 import ArrowIcon from "@/assets/arrow-right.svg";
-import Image from "next/image";
 import cogImage from "@/assets/cog.png";
 import cylinderImage from "@/assets/cylinder.png";
 import halfTorus from "@/assets/half-torus.png";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { useRef } from "react";
 
 export const Hero = () => {
+  const router = useRouter();
   const heroRef = useRef(null);
+
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start end", "end start"],
   });
 
   const translateY = useTransform(scrollYProgress, [0, 1], [150, -150]);
+
+  const handleUserRegister = () => {
+    router.push("/register");
+  };
 
   return (
     <section
@@ -34,7 +40,9 @@ export const Hero = () => {
               successes.
             </p>
             <div className="flex gap-1 items-center mt-[30px]">
-              <button className="btn btn-primary">Get for free</button>
+              <button className="btn btn-primary" onClick={handleUserRegister}>
+                Get for free
+              </button>
               <button className="btn btn-text gap-1">
                 <span>Learn more</span>
                 <ArrowIcon className="w-5 fill-black arrow-right" />

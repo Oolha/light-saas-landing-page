@@ -1,3 +1,18 @@
+interface NavigationItem {
+  label: string;
+  sectionId: string;
+}
+
+export interface NavigationProps {
+  className?: string;
+  itemClassName?: string;
+  withButton?: boolean;
+  direction?: "horizontal" | "vertical";
+  buttonText?: string;
+  onButtonClick?: () => void;
+  items?: NavigationItem[];
+  onLinkClick?: () => void;
+}
 export interface PricingTier {
   _id: string;
   title: string;
@@ -53,4 +68,13 @@ export interface Subscription {
   endDate: Date | null;
   isActive: boolean;
   paymentId: string | null;
+}
+export interface InputFieldProps {
+  label: string;
+  name: string;
+  type?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  required?: boolean;
 }

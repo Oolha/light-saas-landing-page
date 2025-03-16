@@ -5,13 +5,13 @@
     @apply mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 max-w-7xl;
   }
   .btn {
-    @apply py-2 px-4 rounded-lg font-medium inline-flex items-center justify-center tracking-tight;
+    @apply py-2 px-4 rounded-lg font-medium inline-flex items-center justify-center tracking-tight cursor-pointer;
   }
   .btn-primary {
-    @apply bg-black text-white;
+    @apply bg-black text-white hover:bg-black/85 transition-colors duration-200;
   }
   .btn-text {
-    @apply bg-transparent text-black;
+    @apply bg-transparent text-black cursor-pointer hover:bg-white/20 transition-colors duration-200;
   }
   .arrow-right {
     @apply inline-flex justify-center items-center;

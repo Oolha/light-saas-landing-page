@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import Link from "next/link";
+import Image from "next/image";
+import Logo from "@/assets/logo-saas.png";
 
 export default function DashboardPage() {
   const { user, isLoading, logout } = useAuth();
@@ -14,7 +16,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push("/login");
+      router.push("/");
     }
 
     if (justSubscribed) {
@@ -42,15 +44,24 @@ export default function DashboardPage() {
     return null;
   }
 
+  const handleHome = () => {
+    router.push("/");
+  }
+
   return (
     <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div className="bg-white shadow-sm mb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-xl font-bold text-indigo-600">Dashboard</h1>
-              </div>
+            <div className="flex-shrink-0 flex items-center gap-2" onClick={handleHome}>
+              <Image
+                src={Logo}
+                alt="Saas Logo"
+                width={40}
+                height={40}
+                className="cursor-pointer"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              />
             </div>
             <div className="flex items-center">
               <button

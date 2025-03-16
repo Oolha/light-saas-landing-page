@@ -1,26 +1,12 @@
-interface NavigationItem {
-  label: string;
-  sectionId: string;
-}
-
-interface NavigationProps {
-  className?: string;
-  itemClassName?: string;
-  withButton?: boolean;
-  direction?: "horizontal" | "vertical";
-  buttonText?: string;
-  onButtonClick?: () => void;
-  items?: NavigationItem[];
-  onLinkClick?: () => void;
-}
+import { useAuth } from "@/lib/AuthContext";
+import { NavigationProps } from "@/types";
+import { useRouter } from "next/navigation";
 
 export const Navigation = ({
   className = "",
   itemClassName = "text-black/60",
   withButton = true,
   direction = "horizontal",
-  buttonText = "Get for free",
-  onButtonClick,
   onLinkClick,
   items = [
     { label: "About", sectionId: "about" },
@@ -30,6 +16,9 @@ export const Navigation = ({
     { label: "Help", sectionId: "footer" },
   ],
 }: NavigationProps) => {
+  const { user } = useAuth();
+  const router = useRouter();
+
   const scrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
     if (section) {
@@ -44,6 +33,13 @@ export const Navigation = ({
     }
   };
 
+  const handleButtonClick = () => {
+    if (user) {
+      router.push("/dashboard");
+    } else {
+      scrollToSection("pricing");
+    }
+  };
   return (
     <nav
       className={`${direction === "vertical" ? "flex-col" : "flex-row"} flex ${direction === "horizontal" ? "items-center" : ""} gap-6 ${className}`}
@@ -63,19 +59,10 @@ export const Navigation = ({
       ))}
       {withButton && (
         <button
-          className="bg-black text-white py-2 px-4 rounded-lg font-medium inline-flex items-center justify-center tracking-tight hover:bg-black/90 transition-colors duration-200"
-          onClick={() => {
-            if (onButtonClick) {
-              onButtonClick();
-            } else {
-              scrollToSection("cta");
-              if (onLinkClick) {
-                onLinkClick();
-              }
-            }
-          }}
+          className="bg-black text-white py-2 px-4 rounded-lg font-medium inline-flex items-center justify-center tracking-tight hover:bg-black/90 transition-colors duration-200 cursor-pointer"
+          onClick={handleButtonClick}
         >
-          {buttonText}
+          {user ? "Go to Dashboard" : "Get for Free"}
         </button>
       )}
     </nav>

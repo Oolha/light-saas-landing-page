@@ -5,11 +5,15 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { subscriptionService } from "@/services/api";
 import Link from "next/link";
+import InputField from "@/components/InputField";
 
 export default function SubscriptionPage() {
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [cvv, setCvv] = useState("");
+  const [formData, setFormData] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+  });
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,19 +21,16 @@ export default function SubscriptionPage() {
   const selectedPlan = searchParams.get("plan");
   const { user } = useAuth();
   const router = useRouter();
-  const [isLoggedOut, setIsLoggedOut] = useState(false);
 
   const intentionalRedirect = useRef(false);
 
   useEffect(() => {
-    if (intentionalRedirect.current) {
+    if (intentionalRedirect.current) return;
+
+    if (!user) {
+      const isLoggingOut = sessionStorage.getItem("loggingOut") === "true";
+      router.push(isLoggingOut ? "/" : "/login");
       return;
-    }
-
-    const isLoggingOut = sessionStorage.getItem("loggingOut") === "true";
-
-    if (!user && !isLoggingOut) {
-      router.push("/login");
     }
 
     if (selectedPlan === "Free") {
@@ -38,23 +39,28 @@ export default function SubscriptionPage() {
     }
   }, [user, selectedPlan, router]);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
+    setError(null);
 
     try {
       await subscriptionService.updatePlan(selectedPlan as "Pro" | "Business");
       router.push("/dashboard?subscribed=true");
-    } catch (err: any) {
-      setError(err.message || "Failed to process subscription");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to process subscription"
+      );
     } finally {
       setIsProcessing(false);
     }
   };
 
-  if (!selectedPlan || !user) {
-    return null;
-  }
+  if (!selectedPlan || !user) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -76,48 +82,35 @@ export default function SubscriptionPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Card Number
-              </label>
-              <input
-                type="text"
-                value={cardNumber}
-                onChange={(e) => setCardNumber(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="1234 5678 9012 3456"
-                required
-              />
-            </div>
+            <InputField
+              label="Card Number"
+              name="cardNumber"
+              type="text"
+              value={formData.cardNumber}
+              onChange={handleChange}
+              placeholder="1234 5678 9012 3456"
+              required
+            />
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Expiry Date
-                </label>
-                <input
-                  type="text"
-                  value={expiryDate}
-                  onChange={(e) => setExpiryDate(e.target.value)}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="MM/YY"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  CVV
-                </label>
-                <input
-                  type="text"
-                  value={cvv}
-                  onChange={(e) => setCvv(e.target.value)}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="123"
-                  required
-                />
-              </div>
+              <InputField
+                label="Expiry Date"
+                name="expiryDate"
+                type="text"
+                value={formData.expiryDate}
+                onChange={handleChange}
+                placeholder="MM/YY"
+                required
+              />
+              <InputField
+                label="CVV"
+                name="cvv"
+                type="text"
+                value={formData.cvv}
+                onChange={handleChange}
+                placeholder="123"
+                required
+              />
             </div>
 
             <button

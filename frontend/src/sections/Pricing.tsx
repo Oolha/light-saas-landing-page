@@ -96,7 +96,8 @@ export default function Pricing() {
                 onClick={() => handlePlanSelection(item)}
                 className={twMerge(
                   "btn btn-primary w-full mt-[30px]",
-                  item.inverse === true && "bg-white text-black"
+                  item.inverse === true &&
+                    "bg-white text-black  hover:bg-white/90 transition-colors duration-200"
                 )}
               >
                 {item.buttonText}
