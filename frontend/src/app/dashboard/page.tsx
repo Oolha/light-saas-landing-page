@@ -429,12 +429,12 @@ export default function DashboardPage() {
                   Upgrade your plan to unlock premium features like advanced
                   analytics, unlimited storage, and more!
                 </p>
-                <Link
-                  href="/#pricing"
+                <button
+                  onClick={() => setIsModalOpen(true)}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   View Pricing Plans
-                </Link>
+                </button>
               </div>
             )}
           </div>
@@ -443,7 +443,6 @@ export default function DashboardPage() {
       <PricingModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        pricingTiers={pricingTiers}
       />
     </div>
   );
