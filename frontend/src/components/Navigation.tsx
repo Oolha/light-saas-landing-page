@@ -27,6 +27,8 @@ export const Navigation = ({
         behavior: "smooth",
       });
 
+      window.history.pushState(null, "", `#${sectionId}`);
+
       if (onLinkClick) {
         onLinkClick();
       }

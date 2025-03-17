@@ -21,6 +21,9 @@ export const Hero = () => {
   const handleUserRegister = () => {
     router.push("/register");
   };
+  const handleUserInform = () => {
+    router.push("/register");
+  };
 
   return (
     <section

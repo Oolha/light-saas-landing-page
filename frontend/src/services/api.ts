@@ -36,6 +36,23 @@ export const pricingService = {
       await api.get("/pricing-tiers");
     return response.data.sort((a, b) => a.order - b.order);
   },
+
+  //SSG (getStaticProps)
+  getAllForSSG: async (): Promise<PricingTier[]> => {
+    try {
+      const response = await fetch(`${API_URL}/pricing-tiers`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch pricing data");
+      }
+
+      const data = await response.json();
+      return data.sort((a: PricingTier, b: PricingTier) => a.order - b.order);
+    } catch (error) {
+      console.error("Error fetching pricing data:", error);
+      return [];
+    }
+  },
 };
 
 export const testimonialService = {
@@ -43,6 +60,21 @@ export const testimonialService = {
     const response: AxiosResponse<Testimonial[]> =
       await api.get("/testimonials");
     return response.data;
+  },
+  //SSG (getStaticProps)
+  getAllForSSG: async (): Promise<Testimonial[]> => {
+    try {
+      const response = await fetch(`${API_URL}/testimonials`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch testimonials data");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching testimonials data:", error);
+      return [];
+    }
   },
 };
 

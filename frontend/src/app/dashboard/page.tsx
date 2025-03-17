@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/AuthContext";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/assets/logo-saas.png";
+import PricingModal from "@/components/PricingModal";
 
 export default function DashboardPage() {
   const { user, isLoading, logout } = useAuth();
@@ -13,6 +14,8 @@ export default function DashboardPage() {
   const searchParams = useSearchParams();
   const justSubscribed = searchParams.get("subscribed") === "true";
   const [showSubscriptionAlert, setShowSubscriptionAlert] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -46,14 +49,17 @@ export default function DashboardPage() {
 
   const handleHome = () => {
     router.push("/");
-  }
+  };
 
   return (
     <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div className="bg-white shadow-sm mb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex-shrink-0 flex items-center gap-2" onClick={handleHome}>
+            <div
+              className="flex-shrink-0 flex items-center gap-2"
+              onClick={handleHome}
+            >
               <Image
                 src={Logo}
                 alt="Saas Logo"
@@ -119,14 +125,14 @@ export default function DashboardPage() {
                       Your current plan and subscription details.
                     </p>
                   </div>
-                  <Link
-                    href="/pricing"
+                  <button
+                    onClick={() => setIsModalOpen(true)}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     {user.subscription.plan === "Free"
                       ? "Upgrade Plan"
                       : "Change Plan"}
-                  </Link>
+                  </button>
                 </div>
                 <div className="border-t border-indigo-200">
                   <dl>
@@ -424,7 +430,7 @@ export default function DashboardPage() {
                   analytics, unlimited storage, and more!
                 </p>
                 <Link
-                  href="/pricing"
+                  href="/#pricing"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   View Pricing Plans
@@ -434,6 +440,11 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      <PricingModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        pricingTiers={pricingTiers}
+      />
     </div>
   );
 }
