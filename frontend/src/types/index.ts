@@ -44,7 +44,12 @@ export interface User {
   name: string;
   email: string;
   role: string;
-  subscription?: Subscription;
+  subscription: {
+    plan: "Free" | "Pro" | "Business";
+    isActive: boolean;
+    startDate?: string;
+    endDate?: string;
+  };
 }
 
 export interface AuthContextType {
@@ -60,6 +65,7 @@ export interface AuthContextType {
   ) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
+  refreshUserData: () => Promise<boolean>;
 }
 
 export interface Subscription {

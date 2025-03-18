@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/lib/AuthContext";
-import Link from "next/link";
+import { useAuth } from "@/hooks/useContext";
 import Image from "next/image";
 import Logo from "@/assets/logo-saas.png";
 import PricingModal from "@/components/PricingModal";
 
 export default function DashboardPage() {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading, logout, refreshUserData } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const justSubscribed = searchParams.get("subscribed") === "true";
@@ -17,19 +16,25 @@ export default function DashboardPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/");
+useEffect(() => {
+  if (!isLoading && !user) {
+    router.push("/");
+    return;
+  }
+
+  if (justSubscribed && user) {
+    if (sessionStorage.getItem("temp_token")) {
+      refreshUserData();
+      sessionStorage.removeItem("temp_token");
     }
 
-    if (justSubscribed) {
-      setShowSubscriptionAlert(true);
-      const timer = setTimeout(() => {
-        setShowSubscriptionAlert(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [user, isLoading, router, justSubscribed]);
+    setShowSubscriptionAlert(true);
+    const timer = setTimeout(() => {
+      setShowSubscriptionAlert(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }
+}, [user, isLoading, router, justSubscribed, refreshUserData]);
 
   const handleLogout = async () => {
     await logout();
@@ -49,6 +54,10 @@ export default function DashboardPage() {
 
   const handleHome = () => {
     router.push("/");
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -440,10 +449,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      <PricingModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      <PricingModal isOpen={isModalOpen} onClose={handleModalClose} />
     </div>
   );
 }

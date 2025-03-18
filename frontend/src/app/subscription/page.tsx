@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useAuth } from "@/lib/AuthContext";
+import { useAuth } from "@/hooks/useContext";
 import { subscriptionService } from "@/services/api";
 import Link from "next/link";
 import InputField from "@/components/InputField";
@@ -19,7 +19,7 @@ export default function SubscriptionPage() {
 
   const searchParams = useSearchParams();
   const selectedPlan = searchParams.get("plan");
-  const { user } = useAuth();
+  const { user, refreshUserData } = useAuth();
   const router = useRouter();
 
   const intentionalRedirect = useRef(false);
@@ -50,10 +50,27 @@ export default function SubscriptionPage() {
 
     try {
       await subscriptionService.updatePlan(selectedPlan as "Pro" | "Business");
-      router.push("/dashboard?subscribed=true");
-    } catch (err) {
+
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        sessionStorage.setItem("temp_token", token);
+      }
+      const success = await refreshUserData();
+
+      if (success) {
+        intentionalRedirect.current = true;
+        router.push("/dashboard?subscribed=true");
+      } else {
+        setError(
+          "Subscription updated, but there was a problem updating profile."
+        );
+      }
+    } catch (err: any) {
+      console.error("Subscription error:", err);
       setError(
-        err instanceof Error ? err.message : "Failed to process subscription"
+        err.response?.data?.message ||
+          err.message ||
+          "Subscription processing failed"
       );
     } finally {
       setIsProcessing(false);

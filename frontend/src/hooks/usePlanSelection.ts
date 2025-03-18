@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/AuthContext";
 import { PricingTier } from "@/types";
+import { useAuth } from "./useContext";
 
 export function usePlanSelection() {
   const router = useRouter();
@@ -21,6 +21,6 @@ export function usePlanSelection() {
 
   return {
     handlePlanSelection,
-    currentPlan: user?.subscription?.plan
+    currentPlan: user?.subscription?.plan,
   };
 }

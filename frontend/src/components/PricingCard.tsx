@@ -8,12 +8,14 @@ import { useState, useEffect } from "react";
 interface PricingCardProps {
   tier: PricingTier;
   isCurrentPlan?: boolean;
+  isDisabled?: boolean;
   onClick: (plan: PricingTier) => void;
 }
 
 export default function PricingCard({
   tier,
   isCurrentPlan,
+  isDisabled = false,
   onClick,
 }: PricingCardProps) {
   const [isClient, setIsClient] = useState(false);
@@ -79,13 +81,15 @@ export default function PricingCard({
 
       <button
         onClick={() => onClick(tier)}
+        disabled={isDisabled || isCurrentPlan}
         className={twMerge(
           "btn btn-primary w-full mt-[30px]",
           tier.inverse === true &&
-            "bg-white text-black hover:bg-white/90 transition-colors duration-200"
+            "bg-white text-black hover:bg-white/90 transition-colors duration-200",
+          (isDisabled || isCurrentPlan) && "opacity-70 cursor-not-allowed"
         )}
       >
-        {tier.buttonText}
+        {isCurrentPlan ? "Current Plan" : tier.buttonText}
       </button>
 
       <ul className="flex flex-col gap-5 mt-8">

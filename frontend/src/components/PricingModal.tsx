@@ -8,9 +8,10 @@ import {
 } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { PricingTier } from "@/types";
-import { usePlanSelection } from "@/hooks/usePlanSelection";
-import { pricingService } from "@/services/api";
+import { pricingService, subscriptionService } from "@/services/api";
 import PricingCard from "./PricingCard";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useContext";
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -20,7 +21,9 @@ interface PricingModalProps {
 export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
   const [pricingTiers, setPricingTiers] = useState<PricingTier[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { handlePlanSelection, currentPlan } = usePlanSelection();
+  const [isUpdating, setIsUpdating] = useState(false);
+  const router = useRouter();
+  const { user, refreshUserData } = useAuth();
 
   useEffect(() => {
     if (isOpen) {
@@ -39,9 +42,36 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
     }
   }, [isOpen]);
 
-  const handleModalPlanSelection = (plan: PricingTier) => {
-    onClose();
-    handlePlanSelection(plan);
+  const handlePlanSelection = async (plan: PricingTier) => {
+    if (user?.subscription?.plan === plan.title) {
+      onClose();
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+
+      if (plan.title === "Free") {
+        await subscriptionService.updatePlan(
+          plan.title as "Free" | "Pro" | "Business"
+        );
+        const success = await refreshUserData();
+
+        if (success) {
+          onClose();
+          router.push("/dashboard?subscribed=true");
+        } else {
+          onClose();
+        }
+      } else {
+        onClose();
+        router.push(`/subscription?plan=${plan.title}`);
+      }
+    } catch (error) {
+      console.error("Error updating plan:", error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -83,13 +113,16 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 place-items-center">
+                  <div className="flex flex-col items-center lg:flex-row lg:items-center lg:justify-center gap-6">
                     {pricingTiers.map((item) => (
                       <div key={item._id} className="w-full max-w-xs lg:w-auto">
                         <PricingCard
                           tier={item}
-                          onClick={handleModalPlanSelection}
-                          isCurrentPlan={currentPlan === item.title}
+                          onClick={handlePlanSelection}
+                          isCurrentPlan={
+                            user?.subscription?.plan === item.title
+                          }
+                          isDisabled={isUpdating}
                         />
                       </div>
                     ))}
@@ -100,7 +133,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                   <button
                     onClick={onClose}
                     className="btn btn-text"
-                    disabled={isLoading}
+                    disabled={isLoading || isUpdating}
                   >
                     Close
                   </button>

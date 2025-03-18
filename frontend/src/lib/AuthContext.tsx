@@ -1,20 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContextType, User } from "@/types";
+import { api } from "@/services/api";
 
-const API_URL = "https://saas-website-tlj3.onrender.com/api";
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -23,103 +16,79 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        try {
-          const response = await fetch(`${API_URL}/auth/me`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            credentials: "include",
-          });
+    const loadUser = async () => {
+      try {
+        setIsLoading(true);
+        const token =
+          localStorage.getItem("accessToken") ||
+          sessionStorage.getItem("temp_token");
 
-          if (response.ok) {
-            const data = await response.json();
-            setUser(data.data);
-          } else {
-            try {
-              await refreshToken();
-            } catch (error) {
-              localStorage.removeItem("accessToken");
-              setUser(null);
-            }
+        if (token) {
+          if (
+            !localStorage.getItem("accessToken") &&
+            sessionStorage.getItem("temp_token")
+          ) {
+            localStorage.setItem(
+              "accessToken",
+              sessionStorage.getItem("temp_token")!
+            );
+            sessionStorage.removeItem("temp_token");
           }
-        } catch (error) {
-          console.error("Auth check error:", error);
+          const response = await api.get("/auth/me");
+          setUser(response.data.data.user);
         }
+      } catch (error) {
+        console.error("Error loading user:", error);
+        localStorage.removeItem("accessToken");
+        sessionStorage.removeItem("temp_token");
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    checkAuth();
+    loadUser();
   }, []);
 
-  // Оновлення токена
-  const refreshToken = async () => {
+  const refreshUserData = async () => {
     try {
-      const response = await fetch(`${API_URL}/auth/refresh`, {
-        method: "POST",
-        credentials: "include",
-      });
+      setIsLoading(true);
+      const response = await api.get("/auth/me");
+      setUser(response.data.data.user);
+      return true;
+    } catch (error: any) {
+      console.error("Error refreshing user data:", error);
+      setError("Failed to refresh user data");
 
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("accessToken", data.data.accessToken);
-
-        // Отримуємо дані користувача
-        const userResponse = await fetch(`${API_URL}/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${data.data.accessToken}`,
-          },
-          credentials: "include",
-        });
-
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          setUser(userData.data);
-        }
-      } else {
-        throw new Error("Failed to refresh token");
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem("accessToken");
+        setUser(null);
       }
-    } catch (error) {
-      console.error("Token refresh error:", error);
-      throw error;
+
+      return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Функція логіну
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
-
-      localStorage.setItem("accessToken", data.data.accessToken);
-      setUser(data.data.user);
+      const response = await api.post("/auth/login", { email, password });
+      localStorage.setItem("accessToken", response.data.data.accessToken);
+      setUser(response.data.data.user);
       router.push("/dashboard");
     } catch (error: any) {
-      setError(error.message || "An error occurred during login");
+      setError(
+        error.response?.data?.message || "An error occurred during login"
+      );
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Функція реєстрації
   const register = async (
     name: string,
     email: string,
@@ -130,40 +99,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, email, password, plan }),
+      const response = await api.post("/auth/register", {
+        name,
+        email,
+        password,
+        plan,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
       await login(email, password);
     } catch (error: any) {
-      setError(error.message || "An error occurred during registration");
+      setError(
+        error.response?.data?.message || "An error occurred during registration"
+      );
       console.error("Registration error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Функція виходу
   const logout = async () => {
     setIsLoading(true);
-
     sessionStorage.setItem("loggingOut", "true");
 
     try {
-      await fetch(`${API_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-
+      await api.post("/auth/logout");
       localStorage.removeItem("accessToken");
       setUser(null);
       router.push("/");
@@ -178,12 +136,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Очищення помилок
   const clearError = () => {
     setError(null);
   };
 
-  // Значення контексту
   const value = {
     user,
     isLoading,
@@ -192,6 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     register,
     logout,
     clearError,
+    refreshUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

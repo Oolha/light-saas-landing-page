@@ -1,4 +1,4 @@
-import { useAuth } from "@/lib/AuthContext";
+import { useAuth } from "@/hooks/useContext";
 import { NavigationProps } from "@/types";
 import { useRouter } from "next/navigation";
 

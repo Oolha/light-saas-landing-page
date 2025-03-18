@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAuth } from "@/lib/AuthContext";
+import { useAuth } from "@/hooks/useContext";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function RegisterPage() {
@@ -20,7 +20,6 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (user) {
-      // Якщо успішно зареєструвались і є параметри для перенаправлення
       if (
         nextPage === "subscription" &&
         selectedPlan &&

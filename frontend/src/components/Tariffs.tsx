@@ -3,9 +3,9 @@ import { PricingTier } from "@/types";
 import CheckIcon from "@/assets/check.svg";
 import { twMerge } from "tailwind-merge";
 import { motion } from "framer-motion";
-import { useAuth } from "@/lib/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useContext";
 
 interface TariffsProps {
   pricingTiers: PricingTier[];

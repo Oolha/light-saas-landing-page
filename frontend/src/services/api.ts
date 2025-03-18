@@ -4,6 +4,7 @@ import {
   Subscription,
   Testimonial,
   UploadResponse,
+  User,
 } from "@/types";
 
 const API_URL = "https://saas-website-tlj3.onrender.com/api";
