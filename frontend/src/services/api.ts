@@ -31,6 +31,36 @@ api.interceptors.request.use(
   }
 );
 
+// Interceptor for automatic token refresh on authorization errors
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (
+      error.response?.status === 401 &&
+      !error.config.url.includes("/auth/refresh") &&
+      !error.config._retry
+    ) {
+      error.config._retry = true;
+
+      try {
+        const response = await api.post("/auth/refresh");
+        const newToken = response.data.data.accessToken;
+
+        if (newToken) {
+          localStorage.setItem("accessToken", newToken);
+          error.config.headers["Authorization"] = `Bearer ${newToken}`;
+
+          return api(error.config);
+        }
+      } catch (refreshError) {
+        console.error("Token refresh failed:", refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export const pricingService = {
   getAll: async (): Promise<PricingTier[]> => {
     const response: AxiosResponse<PricingTier[]> =

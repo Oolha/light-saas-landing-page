@@ -21,16 +21,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
         const token = localStorage.getItem("accessToken");
 
-        if (token) {
-          try {
-            const response = await api.get("/auth/me");
-            setUser(response.data.data.user);
-          } catch (error: any) {
-            console.error("Error loading user:", error);
-            if (
-              error.response &&
-              (error.response.status === 401 || error.response.status === 403)
-            ) {
+        if (!token) return;
+
+        try {
+          const response = await api.get("/auth/me");
+          setUser(response.data.data.user);
+        } catch (error: any) {
+          if (
+            error.response?.status === 401 ||
+            error.response?.status === 403
+          ) {
+            if (await refreshToken()) {
+              try {
+                const newResponse = await api.get("/auth/me");
+                setUser(newResponse.data.data.user);
+              } catch (retryError) {
+                localStorage.removeItem("accessToken");
+                setUser(null);
+              }
+            } else {
               localStorage.removeItem("accessToken");
               setUser(null);
             }
@@ -131,6 +140,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshToken = async () => {
+    try {
+      const response = await api.post("/auth/refresh");
+      const newToken = response.data.data.accessToken;
+
+      if (newToken) {
+        localStorage.setItem("accessToken", newToken);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      return false;
+    }
+  };
+
   const clearError = () => {
     setError(null);
   };
@@ -144,6 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     clearError,
     refreshUserData,
+    refreshToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

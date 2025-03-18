@@ -66,6 +66,7 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   clearError: () => void;
   refreshUserData: () => Promise<boolean>;
+  refreshToken: () => Promise<boolean>;
 }
 
 export interface Subscription {
