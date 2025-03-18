@@ -51,20 +51,9 @@ export default function SubscriptionPage() {
     try {
       await subscriptionService.updatePlan(selectedPlan as "Pro" | "Business");
 
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        sessionStorage.setItem("temp_token", token);
-      }
-      const success = await refreshUserData();
-
-      if (success) {
-        intentionalRedirect.current = true;
-        router.push("/dashboard?subscribed=true");
-      } else {
-        setError(
-          "Subscription updated, but there was a problem updating profile."
-        );
-      }
+      sessionStorage.setItem("plan_updated", "true");
+      intentionalRedirect.current = true;
+      window.location.replace("/dashboard?subscribed=true");
     } catch (err: any) {
       console.error("Subscription error:", err);
       setError(

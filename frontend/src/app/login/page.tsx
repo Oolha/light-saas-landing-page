@@ -4,16 +4,44 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useContext";
 import { useRouter, useSearchParams } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+// validation schema with Zod
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: "Email is required" })
+    .email({ message: "Invalid email address" }),
+  password: z
+    .string()
+    .min(1, { message: "Password is required" })
+    .min(6, { message: "Password must be at least 6 characters" }),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const { login, user, isLoading, error, clearError } = useAuth();
   const router = useRouter();
 
   const searchParams = useSearchParams();
   const nextPage = searchParams.get("next");
   const selectedPlan = searchParams.get("plan");
+
+  // react-hook-form with zod validation
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   useEffect(() => {
     if (user) {
@@ -31,9 +59,9 @@ export default function LoginPage() {
     };
   }, [clearError]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await login(email, password);
+  // handler using react-hook-form
+  const onSubmit = async (data: LoginFormValues) => {
+    await login(data.email, data.password);
   };
 
   return (
@@ -62,7 +90,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label
                 htmlFor="email"
@@ -73,15 +101,19 @@ export default function LoginPage() {
               <div className="mt-1">
                 <input
                   id="email"
-                  name="email"
+                  {...register("email")}
                   type="email"
                   autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                    errors.email ? "border-red-300" : "border-gray-300"
+                  }`}
                   disabled={isLoading}
                 />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -95,15 +127,19 @@ export default function LoginPage() {
               <div className="mt-1">
                 <input
                   id="password"
-                  name="password"
                   type="password"
+                  {...register("password")}
                   autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                    errors.password ? "border-red-300" : "border-gray-300"
+                  }`}
                   disabled={isLoading}
                 />
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
             </div>
 

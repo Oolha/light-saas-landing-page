@@ -4,19 +4,62 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useContext";
 import { useRouter, useSearchParams } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+// validation schema with Zod
+const registerSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, { message: "Full name is required" })
+      .min(2, { message: "Name must be at least 2 characters" }),
+    email: z
+      .string()
+      .min(1, { message: "Email is required" })
+      .email({ message: "Invalid email address" }),
+    password: z
+      .string()
+      .min(1, { message: "Password is required" })
+      .min(6, { message: "Password must be at least 6 characters" }),
+    confirmPassword: z
+      .string()
+      .min(1, { message: "Please confirm your password" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [formError, setFormError] = useState<string | null>(null);
-
-  const { register, user, isLoading, error, clearError } = useAuth();
+  const {
+    register: registerUser,
+    user,
+    isLoading,
+    error,
+    clearError,
+  } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPage = searchParams.get("next");
   const selectedPlan = searchParams.get("plan") || "Free";
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
   useEffect(() => {
     if (user) {
@@ -38,24 +81,11 @@ export default function RegisterPage() {
     };
   }, [clearError]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (password !== confirmPassword) {
-      setFormError("Passwords do not match");
-      return;
-    }
-
-    if (password.length < 6) {
-      setFormError("Password must be at least 6 characters");
-      return;
-    }
-
-    setFormError(null);
-    await register(
-      name,
-      email,
-      password,
+  const onSubmit = async (data: RegisterFormValues) => {
+    await registerUser(
+      data.name,
+      data.email,
+      data.password,
       selectedPlan as "Free" | "Pro" | "Business"
     );
   };
@@ -86,14 +116,14 @@ export default function RegisterPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {(formError || error) && (
+          {error && (
             <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
               <strong className="font-bold">Error: </strong>
-              <span className="block sm:inline">{formError || error}</span>
+              <span className="block sm:inline">{error}</span>
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label
                 htmlFor="name"
@@ -104,15 +134,19 @@ export default function RegisterPage() {
               <div className="mt-1">
                 <input
                   id="name"
-                  name="name"
+                  {...register("name")}
                   type="text"
                   autoComplete="name"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                    errors.name ? "border-red-300" : "border-gray-300"
+                  }`}
                   disabled={isLoading}
                 />
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.name.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -126,15 +160,19 @@ export default function RegisterPage() {
               <div className="mt-1">
                 <input
                   id="email"
-                  name="email"
+                  {...register("email")}
                   type="email"
                   autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                    errors.email ? "border-red-300" : "border-gray-300"
+                  }`}
                   disabled={isLoading}
                 />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -148,15 +186,19 @@ export default function RegisterPage() {
               <div className="mt-1">
                 <input
                   id="password"
-                  name="password"
+                  {...register("password")}
                   type="password"
                   autoComplete="new-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                    errors.password ? "border-red-300" : "border-gray-300"
+                  }`}
                   disabled={isLoading}
                 />
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -170,15 +212,21 @@ export default function RegisterPage() {
               <div className="mt-1">
                 <input
                   id="confirmPassword"
-                  name="confirmPassword"
+                  {...register("confirmPassword")}
                   type="password"
                   autoComplete="new-password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                    errors.confirmPassword
+                      ? "border-red-300"
+                      : "border-gray-300"
+                  }`}
                   disabled={isLoading}
                 />
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
               </div>
             </div>
 

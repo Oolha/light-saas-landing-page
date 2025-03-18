@@ -19,28 +19,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const loadUser = async () => {
       try {
         setIsLoading(true);
-        const token =
-          localStorage.getItem("accessToken") ||
-          sessionStorage.getItem("temp_token");
+        const token = localStorage.getItem("accessToken");
 
         if (token) {
-          if (
-            !localStorage.getItem("accessToken") &&
-            sessionStorage.getItem("temp_token")
-          ) {
-            localStorage.setItem(
-              "accessToken",
-              sessionStorage.getItem("temp_token")!
-            );
-            sessionStorage.removeItem("temp_token");
+          try {
+            const response = await api.get("/auth/me");
+            setUser(response.data.data.user);
+          } catch (error: any) {
+            console.error("Error loading user:", error);
+            if (
+              error.response &&
+              (error.response.status === 401 || error.response.status === 403)
+            ) {
+              localStorage.removeItem("accessToken");
+              setUser(null);
+            }
           }
-          const response = await api.get("/auth/me");
-          setUser(response.data.data.user);
         }
-      } catch (error) {
-        console.error("Error loading user:", error);
-        localStorage.removeItem("accessToken");
-        sessionStorage.removeItem("temp_token");
       } finally {
         setIsLoading(false);
       }

@@ -16,25 +16,24 @@ export default function DashboardPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-useEffect(() => {
-  if (!isLoading && !user) {
-    router.push("/");
-    return;
-  }
-
-  if (justSubscribed && user) {
-    if (sessionStorage.getItem("temp_token")) {
-      refreshUserData();
-      sessionStorage.removeItem("temp_token");
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/");
+      return;
     }
+    const planUpdated = sessionStorage.getItem("plan_updated") === "true";
 
-    setShowSubscriptionAlert(true);
-    const timer = setTimeout(() => {
-      setShowSubscriptionAlert(false);
-    }, 5000);
-    return () => clearTimeout(timer);
-  }
-}, [user, isLoading, router, justSubscribed, refreshUserData]);
+    if ((justSubscribed || planUpdated) && user) {
+      sessionStorage.removeItem("plan_updated");
+      refreshUserData();
+
+      setShowSubscriptionAlert(true);
+      const timer = setTimeout(() => {
+        setShowSubscriptionAlert(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, isLoading, router, justSubscribed, refreshUserData]);
 
   const handleLogout = async () => {
     await logout();

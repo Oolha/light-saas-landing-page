@@ -4,6 +4,7 @@ import cogImage from "@/assets/cog.png";
 import cylinderImage from "@/assets/cylinder.png";
 import halfTorus from "@/assets/half-torus.png";
 import { motion, useScroll, useTransform } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 
@@ -19,9 +20,6 @@ export const Hero = () => {
   const translateY = useTransform(scrollYProgress, [0, 1], [150, -150]);
 
   const handleUserRegister = () => {
-    router.push("/register");
-  };
-  const handleUserInform = () => {
     router.push("/register");
   };
 
@@ -46,10 +44,10 @@ export const Hero = () => {
               <button className="btn btn-primary" onClick={handleUserRegister}>
                 Get for free
               </button>
-              <button className="btn btn-text gap-1">
+              <Link href="/#pricing" className="btn btn-text gap-1">
                 <span>Learn more</span>
                 <ArrowIcon className="w-5 fill-black arrow-right" />
-              </button>
+              </Link>
             </div>
           </div>
           <div className="mt-20 md:mt-0 md:h-[648px] md:flex-1 relative">

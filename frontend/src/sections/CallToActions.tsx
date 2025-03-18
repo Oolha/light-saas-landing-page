@@ -5,15 +5,23 @@ import starImage from "@/assets/star.png";
 import ArrowRight from "@/assets/arrow-right.svg";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export const CallToActions = () => {
+  const router = useRouter();
+
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   });
 
+  const handleUserRegister = () => {
+    router.push("/register");
+  };
   const translateY = useTransform(scrollYProgress, [0, 1], [150, -150]);
+
   return (
     <section
       id="updates"
@@ -47,11 +55,13 @@ export const CallToActions = () => {
           />
         </div>
         <div className="flex gap-2 mt-10 justify-center">
-          <button className="btn btn-primary">Get for free</button>
-          <button className="btn btn-text gap-1">
+          <button className="btn btn-primary" onClick={handleUserRegister}>
+            Get for free
+          </button>
+          <Link href="/#pricing" className="btn btn-text gap-1">
             <span>Learn more</span>
             <ArrowRight className="w-5" />
-          </button>
+          </Link>
         </div>
       </div>
     </section>
