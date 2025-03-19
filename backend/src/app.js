@@ -17,7 +17,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://saas-website-tlj3.onrender.com/api",
+    origin: ["https://progressyio.vercel.app", "http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
