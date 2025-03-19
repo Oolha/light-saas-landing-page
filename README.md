@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Progressy.io
 
-## Getting Started
+A modern, responsive SaaS landing page built with Next.js and Express backend. This full-stack application showcases a productivity tracking app with pricing plans, testimonials, and user authentication functionality.
 
-First, run the development server:
+![Progressy.io](https://progressyio.vercel.app/)
+
+## 🚀 Features
+
+- **Responsive Design**: Fully responsive UI that works on all devices
+- **Modern UI**: Built with TailwindCSS and Framer Motion for smooth animations
+- **User Authentication**: Secure login and registration system
+- **Form Validation**: Client-side validation using React Hook Form and Zod
+- **Backend API**: RESTful API with Express and MongoDB
+- **File Upload**: Support for image uploads with Cloudinary integration
+- **JWT Authentication**: Secure authentication with JSON Web Tokens
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+- [Next.js 15](https://nextjs.org/) - React framework for production
+- [React 19](https://react.dev/) - JavaScript library for building user interfaces
+- [TailwindCSS 4](https://tailwindcss.com/) - Utility-first CSS framework
+- [Framer Motion](https://www.framer.com/motion/) - Animation library for React
+- [React Hook Form](https://react-hook-form.com/) - Form validation library
+- [Zod](https://zod.dev/) - TypeScript-first schema validation
+- [Headless UI](https://headlessui.com/) - Unstyled, accessible UI components
+- [TypeScript](https://www.typescriptlang.org/) - Static type checking
+
+### Backend
+
+- [Express](https://expressjs.com/) - Web framework for Node.js
+- [MongoDB](https://www.mongodb.com/) with [Mongoose](https://mongoosejs.com/) - Database and ODM
+- [JWT](https://jwt.io/) - Authentication with JSON Web Tokens
+- [Bcrypt](https://github.com/kelektiv/node.bcrypt.js) - Password hashing
+- [Cloudinary](https://cloudinary.com/) - Cloud-based image management
+- [Multer](https://github.com/expressjs/multer) - Middleware for handling multipart/form-data
+
+## 📋 Prerequisites
+
+- Node.js 20.x or later
+- MongoDB (local installation or MongoDB Atlas account)
+- Cloudinary account (for image uploads)
+
+## 🚀 Getting Started
+
+### Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Oolha/light-saas-landing-page.git
+cd light-saas-landing-page
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Frontend Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Install dependencies
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Run development server
+npm run dev
 
-## Learn More
+# Build for production
+npm run build
 
-To learn more about Next.js, take a look at the following resources:
+# Start production server
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Backend Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Navigate to backend directory
+cd backend
 
-## Deploy on Vercel
+# Install dependencies
+npm install
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Create .env file (see Environment Variables section)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Run development server
+npm run dev
+
+# Seed database with initial data (optional)
+npm run seed
+
+# Start production server
+npm start
+```
+
+## 🔐 Environment Variables
+
+### Frontend (.env.local)
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+```
+
+### Backend (.env)
+
+```
+PORT=8080
+MONGODB_URI=mongodb://localhost:27017/light-saas
+JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_jwt_refresh_secret
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+FRONTEND_URL=http://localhost:3000
+```
+
+## 👤 Author
+
+Olha Sydorchuk

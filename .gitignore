@@ -16,4 +16,4 @@ frontend/.next/
 frontend/out/
 
 # Other
-.DS_Store
+.DS_Storesrc/uploads/*
