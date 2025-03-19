@@ -2,7 +2,7 @@
 
 A modern, responsive SaaS landing page built with Next.js and Express backend. This full-stack application showcases a productivity tracking app with pricing plans, testimonials, and user authentication functionality.
 
-![Progressy.io](https://progressyio.vercel.app/)
+https://progressyio.vercel.app/
 
 ## 🚀 Features
 
