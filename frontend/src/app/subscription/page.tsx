@@ -6,6 +6,16 @@ import { useAuth } from "@/hooks/useContext";
 import { subscriptionService } from "@/services/api";
 import Link from "next/link";
 import InputField from "@/components/InputField";
+import { getErrorMessage } from "@/utils/errorHandling";
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
 
 export default function SubscriptionPage() {
   const [formData, setFormData] = useState({
@@ -63,13 +73,9 @@ export default function SubscriptionPage() {
       setTimeout(() => {
         router.push("/dashboard?subscribed=true");
       }, 500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Subscription error:", err);
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Subscription processing failed"
-      );
+      setError(getErrorMessage(err, "Subscription processing failed"));
       setIsRedirecting(false);
     } finally {
       setIsProcessing(false);
@@ -85,7 +91,7 @@ export default function SubscriptionPage() {
           Complete Your Subscription
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          You're subscribing to the {selectedPlan} plan
+          You&apos;re subscribing to the {selectedPlan} plan
         </p>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useContext";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import PricingModal from "@/components/PricingModal";
 import SubscriptionInfo from "@/components/SubscriptionInfo";
 import UserProfile from "@/components/UserProfile";
 import FeaturesList from "@/components/FeaturesList";
+import { Loader } from "@/components/Loader";
 
 export default function DashboardPage() {
   const { user, isLoading, logout, refreshUserData } = useAuth();
@@ -64,11 +65,7 @@ export default function DashboardPage() {
   };
 
   if (isLoading && !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!user) {

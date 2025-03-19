@@ -4,7 +4,6 @@ import {
   Subscription,
   Testimonial,
   UploadResponse,
-  User,
 } from "@/types";
 
 const API_URL = "https://saas-website-tlj3.onrender.com/api";
@@ -17,7 +16,6 @@ export const api = axios.create({
 
   withCredentials: true,
 });
-
 
 api.interceptors.request.use(
   (config) => {
@@ -35,13 +33,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-
     if (
       (error.response?.status === 401 || error.response?.status === 403) &&
       !sessionStorage.getItem("loggingOut") &&
       typeof window !== "undefined"
     ) {
-
       const isAuthPage =
         window.location.pathname.includes("/login") ||
         window.location.pathname.includes("/register") ||

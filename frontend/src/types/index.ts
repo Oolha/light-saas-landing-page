@@ -1,3 +1,14 @@
+export interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+    status?: number;
+  };
+  message?: string;
+  code?: string;
+}
+
 interface NavigationItem {
   label: string;
   sectionId: string;

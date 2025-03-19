@@ -2,20 +2,20 @@
 import { Testimonial } from "@/types/index";
 import { motion } from "framer-motion";
 import { TestimonialCard } from "@/components/TestimonialCard";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function Testimonials({ reviews }: { reviews: Testimonial[] }) {
   const [isClient, setIsClient] = useState(false);
-    const [shuffledReviews, setShuffledReviews] = useState<Testimonial[]>([]);
+  const [shuffledReviews, setShuffledReviews] = useState<Testimonial[]>([]);
 
-  const duplicatedReviews = [...reviews, ...reviews];
+  const duplicatedReviews = useMemo(() => [...reviews, ...reviews], [reviews]);
 
   useEffect(() => {
     setIsClient(true);
 
     const shuffled = [...duplicatedReviews].sort(() => Math.random() - 0.5);
     setShuffledReviews(shuffled);
-  }, []);
+  }, [duplicatedReviews]);
 
   const AnimatedTestimonialsColumn = ({
     reviews,

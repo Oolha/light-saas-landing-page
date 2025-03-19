@@ -4,6 +4,7 @@ import React, { createContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContextType, User } from "@/types";
 import { api } from "@/services/api";
+import { getErrorMessage } from "@/utils/errorHandling";
 
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined
@@ -46,8 +47,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           const data = await response.json();
           setUser(data.data.user || data.data);
-        } catch (error) {
-          console.error("Error loading user:", error);
+        } catch (err: unknown) {
+          console.error("Error loading user:", err);
           localStorage.removeItem("accessToken");
           setUser(null);
         }
@@ -95,8 +96,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(data.data.user || data.data);
       console.log("User data refreshed successfully");
       return true;
-    } catch (error) {
-      console.error("Error refreshing user data:", error);
+    } catch (err: unknown) {
+      console.error("Error refreshing user data:", err);
       localStorage.removeItem("accessToken");
       setUser(null);
       return false;
@@ -129,9 +130,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("accessToken", data.data.accessToken);
       setUser(data.data.user);
       router.push("/dashboard");
-    } catch (error: any) {
-      setError(error.message || "An error occurred during login");
-      console.error("Login error:", error);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "An error occurred during login"));
+      console.error("Login error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -162,9 +163,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       await login(email, password);
-    } catch (error: any) {
-      setError(error.message || "An error occurred during registration");
-      console.error("Registration error:", error);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "An error occurred during registration"));
+      console.error("Registration error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -187,8 +188,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setTimeout(() => {
         sessionStorage.removeItem("loggingOut");
       }, 1000);
-    } catch (error) {
-      console.error("Logout error:", error);
+    } catch (err: unknown) {
+      console.error("Logout error:", getErrorMessage(err, "Logout failed"));
+      localStorage.removeItem("accessToken");
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -219,8 +222,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return false;
-    } catch (error) {
-      console.error("Error refreshing token:", error);
+    } catch (err: unknown) {
+      console.error(
+        "Error refreshing token:",
+        getErrorMessage(err, "Failed to refresh token")
+      );
       return false;
     }
   };
