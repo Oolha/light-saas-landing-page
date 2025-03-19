@@ -8,6 +8,7 @@ export const Navigation = ({
   withButton = true,
   direction = "horizontal",
   onLinkClick,
+  onButtonClick,
   items = [
     { label: "About", sectionId: "about" },
     { label: "Pricing", sectionId: "pricing" },
@@ -41,7 +42,12 @@ export const Navigation = ({
     } else {
       scrollToSection("pricing");
     }
+
+    if (onButtonClick) {
+      onButtonClick();
+    }
   };
+
   return (
     <nav
       className={`${direction === "vertical" ? "flex-col" : "flex-row"} flex ${direction === "horizontal" ? "items-center" : ""} gap-6 ${className}`}

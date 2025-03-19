@@ -12,6 +12,7 @@ import { pricingService, subscriptionService } from "@/services/api";
 import PricingCard from "./PricingCard";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useContext";
+import { Loader } from "./Loader";
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -109,9 +110,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                 </p>
 
                 {isLoading ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-                  </div>
+                  <Loader />
                 ) : (
                   <div className="flex flex-col items-center lg:flex-row lg:items-center lg:justify-center gap-6">
                     {pricingTiers.map((item) => (

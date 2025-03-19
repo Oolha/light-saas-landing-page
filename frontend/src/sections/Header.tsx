@@ -3,12 +3,14 @@ import ArrowRight from "@/assets/arrow-right.svg";
 import Image from "next/image";
 import Logo from "@/assets/logo-saas.png";
 import MenuIcon from "@/assets/menu.svg";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { navigationItems } from "@/constants/navigation";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLDivElement>(null);
 
   const scrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
@@ -23,15 +25,12 @@ export const Header = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const navContainer = document.getElementById("mobile-nav-container");
-      const menuButton = document.getElementById("mobile-menu-button");
-
       if (
         isMenuOpen &&
-        navContainer &&
-        !navContainer.contains(event.target as Node) &&
-        menuButton &&
-        !menuButton.contains(event.target as Node)
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(event.target as Node)
       ) {
         setIsMenuOpen(false);
       }
@@ -92,12 +91,15 @@ export const Header = () => {
               className="cursor-pointer"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             />
-            <MenuIcon
-              className="w-5 h-5 md:hidden cursor-pointer"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            />
+            <div ref={menuButtonRef}>
+              <MenuIcon
+                className="w-5 h-5 md:hidden cursor-pointer"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              />
+            </div>
 
             <div
+              ref={menuRef}
               className={`${
                 isMenuOpen
                   ? "absolute top-full left-0 right-0 bg-white py-6 px-4 shadow-lg"
@@ -113,6 +115,7 @@ export const Header = () => {
                   scrollToSection("pricing");
                   setIsMenuOpen(false);
                 }}
+                onLinkClick={() => setIsMenuOpen(false)}
               />
             </div>
           </div>

@@ -6,11 +6,9 @@ import { useEffect, useState } from "react";
 
 export default function Testimonials({ reviews }: { reviews: Testimonial[] }) {
   const [isClient, setIsClient] = useState(false);
+    const [shuffledReviews, setShuffledReviews] = useState<Testimonial[]>([]);
 
   const duplicatedReviews = [...reviews, ...reviews];
-  const reversedReviews = [...duplicatedReviews].reverse();
-
-  const [shuffledReviews, setShuffledReviews] = useState<Testimonial[]>([]);
 
   useEffect(() => {
     setIsClient(true);

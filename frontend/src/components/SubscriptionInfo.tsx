@@ -1,4 +1,4 @@
-import { Subscription, User } from "@/types";
+import { User } from "@/types";
 
 interface SubscriptionInfoProps {
   subscription: User["subscription"] | null;
