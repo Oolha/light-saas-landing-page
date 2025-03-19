@@ -17,7 +17,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://saas-website-tlj3.onrender.com/api",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
