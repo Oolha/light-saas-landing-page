@@ -15,35 +15,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  const [isRefreshingUserData, setIsRefreshingUserData] = useState(false);
+
   useEffect(() => {
     const loadUser = async () => {
       try {
+        if (isRefreshingUserData) return;
+
         setIsLoading(true);
         const token = localStorage.getItem("accessToken");
 
-        if (!token) return;
+        if (!token) {
+          setUser(null);
+          return;
+        }
 
         try {
-          const response = await api.get("/auth/me");
-          setUser(response.data.data.user);
-        } catch (error: any) {
-          if (
-            error.response?.status === 401 ||
-            error.response?.status === 403
-          ) {
-            if (await refreshToken()) {
-              try {
-                const newResponse = await api.get("/auth/me");
-                setUser(newResponse.data.data.user);
-              } catch (retryError) {
-                localStorage.removeItem("accessToken");
-                setUser(null);
-              }
-            } else {
-              localStorage.removeItem("accessToken");
-              setUser(null);
-            }
+          const response = await fetch(`${api.defaults.baseURL}/auth/me`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch user data");
           }
+
+          const data = await response.json();
+          setUser(data.data.user || data.data);
+        } catch (error) {
+          console.error("Error loading user:", error);
+          localStorage.removeItem("accessToken");
+          setUser(null);
         }
       } finally {
         setIsLoading(false);
@@ -51,26 +57,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     loadUser();
-  }, []);
+  }, [isRefreshingUserData]);
 
   const refreshUserData = async () => {
-    try {
-      setIsLoading(true);
-      const response = await api.get("/auth/me");
-      setUser(response.data.data.user);
+    if (isRefreshingUserData) {
+      console.log("Already refreshing user data, skipping duplicate call");
       return true;
-    } catch (error: any) {
-      console.error("Error refreshing user data:", error);
-      setError("Failed to refresh user data");
+    }
 
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        localStorage.removeItem("accessToken");
+    try {
+      setIsRefreshingUserData(true);
+      setIsLoading(true);
+      const token = localStorage.getItem("accessToken");
+
+      if (!token) {
         setUser(null);
+        return false;
       }
 
+      console.log("Refreshing user data...");
+      const response = await fetch(`${api.defaults.baseURL}/auth/me`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        localStorage.removeItem("accessToken");
+        setUser(null);
+        return false;
+      }
+
+      const data = await response.json();
+      setUser(data.data.user || data.data);
+      console.log("User data refreshed successfully");
+      return true;
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+      localStorage.removeItem("accessToken");
+      setUser(null);
       return false;
     } finally {
       setIsLoading(false);
+      setIsRefreshingUserData(false);
     }
   };
 
@@ -79,14 +111,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
-      const response = await api.post("/auth/login", { email, password });
-      localStorage.setItem("accessToken", response.data.data.accessToken);
-      setUser(response.data.data.user);
+      const response = await fetch(`${api.defaults.baseURL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Login failed");
+      }
+
+      const data = await response.json();
+      localStorage.setItem("accessToken", data.data.accessToken);
+      setUser(data.data.user);
       router.push("/dashboard");
     } catch (error: any) {
-      setError(
-        error.response?.data?.message || "An error occurred during login"
-      );
+      setError(error.message || "An error occurred during login");
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
@@ -103,17 +147,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
-      const response = await api.post("/auth/register", {
-        name,
-        email,
-        password,
-        plan,
+      const response = await fetch(`${api.defaults.baseURL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password, plan }),
+        credentials: "include",
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
+
       await login(email, password);
     } catch (error: any) {
-      setError(
-        error.response?.data?.message || "An error occurred during registration"
-      );
+      setError(error.message || "An error occurred during registration");
       console.error("Registration error:", error);
     } finally {
       setIsLoading(false);
@@ -125,10 +175,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     sessionStorage.setItem("loggingOut", "true");
 
     try {
-      await api.post("/auth/logout");
+      await fetch(`${api.defaults.baseURL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+
       localStorage.removeItem("accessToken");
       setUser(null);
-      router.push("/");
+      window.location.href = "/";
 
       setTimeout(() => {
         sessionStorage.removeItem("loggingOut");
@@ -140,24 +194,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const clearError = () => {
+    setError(null);
+  };
+
   const refreshToken = async () => {
     try {
-      const response = await api.post("/auth/refresh");
-      const newToken = response.data.data.accessToken;
+      const response = await fetch(`${api.defaults.baseURL}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        console.error("Token refresh failed:", response.status);
+        return false;
+      }
+
+      const data = await response.json();
+      const newToken = data.data.accessToken;
 
       if (newToken) {
         localStorage.setItem("accessToken", newToken);
         return true;
       }
+
       return false;
     } catch (error) {
       console.error("Error refreshing token:", error);
       return false;
     }
-  };
-
-  const clearError = () => {
-    setError(null);
   };
 
   const value = {

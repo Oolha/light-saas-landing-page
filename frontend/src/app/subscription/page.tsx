@@ -16,6 +16,7 @@ export default function SubscriptionPage() {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const searchParams = useSearchParams();
   const selectedPlan = searchParams.get("plan");
@@ -45,15 +46,23 @@ export default function SubscriptionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isProcessing || isRedirecting) return;
+
     setIsProcessing(true);
     setError(null);
 
     try {
       await subscriptionService.updatePlan(selectedPlan as "Pro" | "Business");
-
       sessionStorage.setItem("plan_updated", "true");
+
+      setIsRedirecting(true);
       intentionalRedirect.current = true;
-      window.location.replace("/dashboard?subscribed=true");
+      refreshUserData();
+
+      setTimeout(() => {
+        router.push("/dashboard?subscribed=true");
+      }, 500);
     } catch (err: any) {
       console.error("Subscription error:", err);
       setError(
@@ -61,6 +70,7 @@ export default function SubscriptionPage() {
           err.message ||
           "Subscription processing failed"
       );
+      setIsRedirecting(false);
     } finally {
       setIsProcessing(false);
     }
@@ -121,10 +131,14 @@ export default function SubscriptionPage() {
 
             <button
               type="submit"
-              disabled={isProcessing}
+              disabled={isProcessing || isRedirecting}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
-              {isProcessing ? "Processing..." : "Complete Subscription"}
+              {isProcessing
+                ? "Processing..."
+                : isRedirecting
+                  ? "Redirecting..."
+                  : "Complete Subscription"}
             </button>
 
             <div className="mt-2 text-center">

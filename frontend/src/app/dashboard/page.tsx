@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useContext";
 import Image from "next/image";
@@ -18,24 +18,35 @@ export default function DashboardPage() {
   const [showSubscriptionAlert, setShowSubscriptionAlert] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (isLoading) return;
+  const hasRefreshedData = useRef(false);
 
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (isLoading) return;
     if (!user) {
-      router.push("/");
+      router.push("/login");
       return;
     }
 
     const planUpdated = sessionStorage.getItem("plan_updated") === "true";
 
-    if ((justSubscribed || planUpdated) && user) {
+    if ((justSubscribed || planUpdated) && user && !hasRefreshedData.current) {
+      hasRefreshedData.current = true;
+
       sessionStorage.removeItem("plan_updated");
-      refreshUserData();
 
       setShowSubscriptionAlert(true);
+
       const timer = setTimeout(() => {
         setShowSubscriptionAlert(false);
       }, 5000);
+
       return () => clearTimeout(timer);
     }
   }, [user, isLoading, router, justSubscribed, refreshUserData]);
@@ -52,7 +63,7 @@ export default function DashboardPage() {
     setIsModalOpen(false);
   };
 
-  if (isLoading) {
+  if (isLoading && !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
