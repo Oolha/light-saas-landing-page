@@ -8,15 +8,6 @@ import Link from "next/link";
 import InputField from "@/components/InputField";
 import { getErrorMessage } from "@/utils/errorHandling";
 
-interface ApiError {
-  response?: {
-    data?: {
-      message?: string;
-    };
-  };
-  message?: string;
-}
-
 export default function SubscriptionPage() {
   const [formData, setFormData] = useState({
     cardNumber: "",

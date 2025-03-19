@@ -99,7 +99,7 @@ export default function RegisterPage() {
 
         {selectedPlan !== "Free" && (
           <p className="mt-2 text-center text-md text-indigo-600 font-medium">
-            You're signing up for the {selectedPlan} plan
+            You&apos;re signing up for the {selectedPlan} plan
           </p>
         )}
 
