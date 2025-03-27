@@ -6,7 +6,7 @@ import { LogoTicker } from "@/sections/LogoTicker";
 import Pricing from "@/sections/Pricing";
 import { ProductShowcase } from "@/sections/ProductShowcase";
 import Testimonials from "@/sections/Testimonials";
-import { pricingService, testimonialService } from "@/services/api";
+import { pricingService, testimonialService } from "@/api/services";
 
 export default async function Home() {
   const pricingTiers = await pricingService.getAllForSSG();

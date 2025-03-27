@@ -9,6 +9,14 @@ export interface ApiError {
   code?: string;
 }
 
+export type ApiResponse<T> = {
+  status: number;
+  message: string;
+  data: T;
+};
+
+export type SubscriptionResponse = ApiResponse<{ subscription: Subscription }>;
+
 interface NavigationItem {
   label: string;
   sectionId: string;

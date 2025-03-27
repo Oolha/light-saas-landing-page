@@ -3,7 +3,7 @@
 import React, { createContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContextType, User } from "@/types";
-import { api } from "@/services/api";
+import { api } from "@/api/client";
 import { getErrorMessage } from "@/utils/errorHandling";
 
 export const AuthContext = createContext<AuthContextType | undefined>(

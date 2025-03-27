@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { PricingTier } from "@/types";
-import { pricingService, subscriptionService } from "@/services/api";
+import { pricingService, subscriptionService } from "@/api/services";
 import PricingCard from "./PricingCard";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useContext";

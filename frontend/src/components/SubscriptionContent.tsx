@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useContext";
-import { subscriptionService } from "@/services/api";
+import { subscriptionService } from "@/api/services";
 import Link from "next/link";
 import InputField from "@/components/InputField";
 import { getErrorMessage } from "@/utils/errorHandling";
