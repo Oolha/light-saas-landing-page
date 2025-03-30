@@ -8,7 +8,7 @@ import testimonialsRoutes from "./routes/testimonials.js";
 import uploadsRoutes from "./routes/uploads.js";
 import authRoutes from "./routes/auth.js";
 import subscriptionRoutes from "./routes/subscription.js";
-import stripeRoutes from "./routes/stripeRoutes.js";
+import stripeRoutes from "./routes/stripe.js";
 
 dotenv.config();
 
