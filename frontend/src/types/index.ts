@@ -14,6 +14,17 @@ export type ApiResponse<T> = {
   message: string;
   data: T;
 };
+export interface Subscription {
+  plan: "Free" | "Pro" | "Business";
+  startDate: Date;
+  endDate: Date | null;
+  isActive: boolean;
+  paymentId: string | null;
+  stripeSubscriptionId?: string | null;
+  stripeCustomerId?: string | null;
+  status?: string;
+  currentPeriodEnd?: Date | string | null;
+}
 
 export type SubscriptionResponse = ApiResponse<{ subscription: Subscription }>;
 
@@ -63,11 +74,15 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  stripeCustomerId?: string | null;
   subscription: {
     plan: "Free" | "Pro" | "Business";
     isActive: boolean;
     startDate?: string;
     endDate?: string;
+    stripeSubscriptionId?: string | null;
+    status?: string;
+    currentPeriodEnd?: string | null;
   };
 }
 
@@ -88,13 +103,6 @@ export interface AuthContextType {
   refreshToken: () => Promise<boolean>;
 }
 
-export interface Subscription {
-  plan: "Free" | "Pro" | "Business";
-  startDate: Date;
-  endDate: Date | null;
-  isActive: boolean;
-  paymentId: string | null;
-}
 export interface InputFieldProps {
   label: string;
   name: string;
@@ -103,4 +111,12 @@ export interface InputFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   required?: boolean;
+}
+
+export interface StripeCheckoutSession {
+  sessionId: string;
+}
+
+export interface StripePortalSession {
+  url: string;
 }
