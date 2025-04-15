@@ -36,6 +36,24 @@ https://progressyio.vercel.app/
 - [Cloudinary](https://cloudinary.com/) - Cloud-based image management
 - [Multer](https://github.com/expressjs/multer) - Middleware for handling multipart/form-data
 
+## 💳 Stripe Integration
+
+This project includes a complete subscription payment system powered by Stripe, offering:
+
+- **Subscription Plans**: Multiple subscription tiers with different pricing and features
+- **Secure Checkout**: Integrated Stripe Checkout for secure payment processing
+- **Subscription Management**: Customer portal for managing existing subscriptions
+- **Webhook Integration**: Real-time subscription status updates via Stripe webhooks
+- **Error Handling**: Comprehensive error handling for payment failures
+
+### Stripe Features
+
+- One-time payments and recurring subscriptions
+- Secure payment processing with Stripe Checkout
+- Customer portal for managing subscriptions
+- Automatic invoicing and receipt generation
+- Real-time webhook integration for subscription updates
+
 ## 📋 Prerequisites
 
 - Node.js 20.x or later
@@ -94,6 +112,8 @@ npm start
 
 ```
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
+
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 ```
 
 ### Backend (.env)
@@ -107,6 +127,11 @@ CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 FRONTEND_URL=http://localhost:3000
+
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_PRO_PRICE_ID=
+STRIPE_BUSINESS_PRICE_ID=
 ```
 
 ## 👤 Author
