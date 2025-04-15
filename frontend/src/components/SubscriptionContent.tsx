@@ -3,19 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useContext";
-import { loadStripe, Stripe } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import stripeService from "@/api/stripeServise";
 import Link from "next/link";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 );
-
-// Типи для помилок
-interface StripeError extends Error {
-  type?: string;
-  code?: string;
-}
 
 export default function SubscriptionContent() {
   const [isLoading, setIsLoading] = useState(false);
