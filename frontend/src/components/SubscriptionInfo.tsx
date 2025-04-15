@@ -1,4 +1,8 @@
+"use client";
+
+import stripeService from "@/api/stripeServise";
 import { User } from "@/types";
+import { useState } from "react";
 
 interface SubscriptionInfoProps {
   subscription: User["subscription"] | null;
@@ -13,7 +17,32 @@ export default function SubscriptionInfo({
   subscription,
   onUpgradeClick,
 }: SubscriptionInfoProps) {
+  const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   if (!subscription) return null;
+
+  // Функція для отримання стилізованої дати
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  // Функція для керування підпискою через Stripe
+  const handleManageSubscription = async () => {
+    if (isManagingSubscription) return;
+
+    try {
+      setIsManagingSubscription(true);
+      const { url } = await stripeService.createCustomerPortalSession();
+      window.location.href = url;
+    } catch (error) {
+      console.error("Error creating customer portal:", error);
+      setIsManagingSubscription(false);
+    }
+  };
+
+  // Визначаємо, яку дату показувати (Stripe currentPeriodEnd або звичайну endDate)
+  const displayDate = subscription.currentPeriodEnd || subscription.endDate;
+  const dateLabel = subscription.plan !== "Free" ? "Renewal Date" : "End Date";
 
   return (
     <div className="mt-6">
@@ -66,18 +95,31 @@ export default function SubscriptionInfo({
               </dd>
             </div>
 
-            {subscription.plan !== "Free" && subscription.endDate && (
+            {displayDate && (
               <div className="bg-indigo-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-indigo-800">
-                  Renewal Date
+                  {dateLabel}
                 </dt>
                 <dd className="mt-1 text-sm text-indigo-900 sm:mt-0 sm:col-span-2">
-                  {new Date(subscription.endDate).toLocaleDateString()}
+                  {formatDate(displayDate)}
                 </dd>
               </div>
             )}
           </dl>
         </div>
+
+        {/* Показуємо кнопку управління підпискою тільки для платних планів зі Stripe */}
+        {subscription.plan !== "Free" && subscription.stripeSubscriptionId && (
+          <div className="border-t border-indigo-200 px-4 py-4">
+            <button
+              onClick={handleManageSubscription}
+              disabled={isManagingSubscription}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            >
+              {isManagingSubscription ? "Processing..." : "Manage Subscription"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

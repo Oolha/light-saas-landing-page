@@ -8,12 +8,15 @@ import testimonialsRoutes from "./routes/testimonials.js";
 import uploadsRoutes from "./routes/uploads.js";
 import authRoutes from "./routes/auth.js";
 import subscriptionRoutes from "./routes/subscription.js";
+import stripeRoutes from "./routes/stripe.js";
 
 dotenv.config();
 
 connectDB();
 
 const app = express();
+
+app.use("/api/stripe/webhook", express.raw({ type: "application/json" }));
 
 app.use(
   cors({
@@ -31,6 +34,7 @@ app.use("/api/testimonials", testimonialsRoutes);
 app.use("/api/uploads", uploadsRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/subscription", subscriptionRoutes);
+app.use("/api/stripe", stripeRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

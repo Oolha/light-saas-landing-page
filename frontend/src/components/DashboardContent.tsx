@@ -10,6 +10,7 @@ import SubscriptionInfo from "@/components/SubscriptionInfo";
 import UserProfile from "@/components/UserProfile";
 import FeaturesList from "@/components/FeaturesList";
 import { Loader } from "@/components/Loader";
+import SubscriptionAlert from "./SubscriptionAlert";
 
 export default function DashboardContent() {
   const { user, isLoading, logout, refreshUserData } = useAuth();
@@ -17,6 +18,9 @@ export default function DashboardContent() {
   const searchParams = useSearchParams();
   const justSubscribed = searchParams.get("subscribed") === "true";
   const [showSubscriptionAlert, setShowSubscriptionAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState(
+    "Your subscription has been updated."
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasRefreshedData = useRef(false);
@@ -37,12 +41,37 @@ export default function DashboardContent() {
 
     const planUpdated = sessionStorage.getItem("plan_updated") === "true";
 
-    if ((justSubscribed || planUpdated) && user && !hasRefreshedData.current) {
-      hasRefreshedData.current = true;
+    if ((justSubscribed || planUpdated) && user) {
+      // Якщо це перше завантаження зі статусом "subscribed=true"
+      if (!hasRefreshedData.current) {
+        console.log("Subscription detected, refreshing user data...");
 
-      sessionStorage.removeItem("plan_updated");
+        // Спочатку запускаємо оновлення користувача з сервера
+        refreshUserData()
+          .then(() => {
+            console.log("User data refreshed successfully");
+            hasRefreshedData.current = true;
+            sessionStorage.removeItem("plan_updated");
 
-      setShowSubscriptionAlert(true);
+            if (justSubscribed) {
+              setAlertMessage(
+                "Thank you for your subscription! Your payment was successful."
+              );
+            } else {
+              setAlertMessage("Your subscription has been updated.");
+            }
+
+            setShowSubscriptionAlert(true);
+
+            // Після показу алерту та оновлення даних, замінюємо URL без параметрів
+            if (justSubscribed) {
+              setTimeout(() => router.replace("/dashboard"), 300);
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to refresh user data:", err);
+          });
+      }
 
       const timer = setTimeout(() => {
         setShowSubscriptionAlert(false);
@@ -51,7 +80,6 @@ export default function DashboardContent() {
       return () => clearTimeout(timer);
     }
   }, [user, isLoading, router, justSubscribed, refreshUserData]);
-
   const handleLogout = async () => {
     await logout();
   };
@@ -102,29 +130,11 @@ export default function DashboardContent() {
         </div>
       </header>
 
-      {/* Subscription Alert */}
-      {showSubscriptionAlert && (
-        <div className="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
-          <strong className="font-bold">Success! </strong>
-          <span className="block sm:inline">
-            Your subscription has been updated.
-          </span>
-          <button
-            onClick={() => setShowSubscriptionAlert(false)}
-            className="absolute top-0 bottom-0 right-0 px-4 py-3"
-          >
-            <span className="sr-only">Close</span>
-            <svg
-              className="fill-current h-6 w-6 text-green-500"
-              role="button"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-            >
-              <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
-            </svg>
-          </button>
-        </div>
-      )}
+      <SubscriptionAlert
+        message={alertMessage}
+        isVisible={showSubscriptionAlert}
+        onClose={() => setShowSubscriptionAlert(false)}
+      />
 
       <div className="px-4 py-6 sm:px-0">
         <div className="border-4 border-dashed border-gray-200 rounded-lg p-6">

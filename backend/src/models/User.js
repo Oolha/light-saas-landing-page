@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    stripeCustomerId: {
+      type: String,
+      default: null,
+    },
     subscription: {
       plan: {
         type: String,
@@ -45,6 +49,31 @@ const userSchema = new mongoose.Schema(
       },
       paymentId: {
         type: String,
+        default: null,
+      },
+      stripeSubscriptionId: {
+        type: String,
+        default: null,
+      },
+      stripeSubscriptionId: {
+        type: String,
+        default: null,
+      },
+      status: {
+        type: String,
+        enum: [
+          "active",
+          "canceled",
+          "past_due",
+          "unpaid",
+          "incomplete",
+          "incomplete_expired",
+          "trialing",
+        ],
+        default: "active",
+      },
+      currentPeriodEnd: {
+        type: Date,
         default: null,
       },
     },
