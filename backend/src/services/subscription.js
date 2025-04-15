@@ -30,7 +30,7 @@ export const updateUserSubscription = async (userId, planData) => {
   return user;
 };
 
-// simulation of process payment for subscription
+// simulation of process payment
 export const processSubscriptionPayment = async (
   userId,
   planData,
