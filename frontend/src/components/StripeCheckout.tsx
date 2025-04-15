@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { loadStripe, Stripe } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import stripeService from "@/api/stripeServise";
 import { useRouter } from "next/navigation";
 import { Loader } from "./Loader";
@@ -16,15 +16,12 @@ interface StripeCheckoutProps {
 
 export default function StripeCheckout({ planTitle }: StripeCheckoutProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Create a checkout session and redirect to Stripe Checkout
     const redirectToCheckout = async () => {
       try {
-        setLoading(true);
-
         // Get an instance of Stripe
         const stripe = await stripePromise;
         if (!stripe) {
@@ -43,13 +40,13 @@ export default function StripeCheckout({ planTitle }: StripeCheckoutProps) {
         if (result.error) {
           throw new Error(result.error.message);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error redirecting to Stripe:", err);
-        setError(
-          err.message || "An error occurred while processing the payment."
-        );
-      } finally {
-        setLoading(false);
+        const errorMsg =
+          err instanceof Error
+            ? err.message
+            : "An error occurred while processing the payment.";
+        setError(errorMsg);
       }
     };
 

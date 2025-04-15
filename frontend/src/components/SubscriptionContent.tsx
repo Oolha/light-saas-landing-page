@@ -1,15 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useContext";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
 import stripeService from "@/api/stripeServise";
 import Link from "next/link";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 );
+
+// Типи для помилок
+interface StripeError extends Error {
+  type?: string;
+  code?: string;
+}
 
 export default function SubscriptionContent() {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +29,41 @@ export default function SubscriptionContent() {
   const router = useRouter();
 
   const intentionalRedirect = useRef(false);
+
+  // Функція для створення Stripe Checkout сесії (перенесена вище useEffect і обгорнута у useCallback)
+  const handleStripeCheckout = useCallback(async () => {
+    try {
+      if (!plan || plan === "Free" || isLoading) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      // Отримуємо екземпляр Stripe
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error("Не вдалося завантажити Stripe");
+      }
+
+      // Створюємо checkout сесію
+      const { sessionId } = await stripeService.createCheckoutSession(plan);
+
+      // Перенаправляємо на Stripe Checkout
+      intentionalRedirect.current = true;
+      const { error } = await stripe.redirectToCheckout({ sessionId });
+
+      if (error) {
+        throw error;
+      }
+    } catch (err: unknown) {
+      console.error("Error redirecting to Stripe:", err);
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "An error occurred while processing the payment";
+      setError(errorMessage);
+      setIsLoading(false);
+    }
+  }, [plan, isLoading]);
 
   useEffect(() => {
     if (intentionalRedirect.current) return;
@@ -52,38 +93,7 @@ export default function SubscriptionContent() {
     if (plan && plan !== "Free") {
       handleStripeCheckout();
     }
-  }, [user, plan, router]);
-
-  // Функція для створення Stripe Checkout сесії
-  const handleStripeCheckout = async () => {
-    try {
-      if (!plan || plan === "Free" || isLoading) return;
-
-      setIsLoading(true);
-      setError(null);
-
-      // Отримуємо екземпляр Stripe
-      const stripe = await stripePromise;
-      if (!stripe) {
-        throw new Error("Не вдалося завантажити Stripe");
-      }
-
-      // Створюємо checkout сесію
-      const { sessionId } = await stripeService.createCheckoutSession(plan);
-
-      // Перенаправляємо на Stripe Checkout
-      intentionalRedirect.current = true;
-      const { error } = await stripe.redirectToCheckout({ sessionId });
-
-      if (error) {
-        throw error;
-      }
-    } catch (err: any) {
-      console.error("Error redirecting to Stripe:", err);
-      setError(err.message || "An error occurred while processing the payment");
-      setIsLoading(false);
-    }
-  };
+  }, [user, plan, router, handleStripeCheckout]);
 
   // Функція для переходу на портал клієнта
   const handleManageSubscription = async () => {
@@ -92,9 +102,13 @@ export default function SubscriptionContent() {
       const { url } = await stripeService.createCustomerPortalSession();
       intentionalRedirect.current = true;
       window.location.href = url;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error creating customer portal:", err);
-      setError(err.message || "Unable to open subscription management portal");
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Unable to open subscription management portal";
+      setError(errorMessage);
       setIsLoading(false);
     }
   };
@@ -144,10 +158,10 @@ export default function SubscriptionContent() {
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            You're Already Subscribed
+            You&apos;re Already Subscribed
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            You're already subscribed to the {plan} plan.
+            You&apos;re already subscribed to the {plan} plan.
           </p>
         </div>
 

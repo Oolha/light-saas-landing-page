@@ -10,8 +10,8 @@ export default function SubscriptionUpdateAlert({
   return (
     <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded">
       <p className="text-sm text-yellow-700">
-        Your payment was successful! Please click the "Refresh Subscription"
-        button to update your subscription information.
+        Your payment was successful! Please click the &quot;Refresh
+        Subscription&quot; button to update your subscription information.
       </p>
     </div>
   );
